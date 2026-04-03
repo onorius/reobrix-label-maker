@@ -124,6 +124,7 @@
     .bat-safety { padding-top: 2px !important; margin-top: 1px !important; }
     .lbl-footer-note { padding: 1px 8px !important; }
     .lbl-symbols { padding: 3px 8px 4px !important; gap: 6px !important; margin-top: 0 !important; }
+    .lot-input { caret-color: transparent; cursor: default; border: none !important; outline: none !important; background: transparent !important; }
   }
 </style>
 </head>
@@ -209,7 +210,7 @@
     </div>
     <div class="lbl-id-cell">
       <div class="field-name" data-i18n="lot">Lot</div>
-      <div class="field-val"></div>
+      <input type="text" id="lotInput" class="field-val lot-input" placeholder="Add LOT number" oninput="document.getElementById('lotWarning').style.display='none';syncClones()" style="border:none;outline:none;background:transparent;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;color:#111;width:100%;padding:0;margin-top:3px;min-height:14px;-webkit-appearance:none;appearance:none;box-shadow:none;">
     </div>
     <div class="lbl-id-cell">
       <div class="field-name" data-i18n="origin">Origine</div>
@@ -318,6 +319,7 @@
 
 <button class="print-btn" onclick="doPrint()" data-i18n="printBtn">Tipărește eticheta</button>
 <div id="printWarning" style="display:none;margin-top:8px;font-size:11px;color:#b91c1c;background:#fff5f5;border:0.5px solid #f5a0a0;border-radius:6px;padding:6px 14px;">⚠️ Selectează modelul produsului înainte de tipărire.</div>
+<div id="lotWarning" style="display:none;margin-top:8px;font-size:11px;color:#b91c1c;background:#fff5f5;border:0.5px solid #f5a0a0;border-radius:6px;padding:6px 14px;">⚠️ Please enter the LOT number before printing.</div>
 
 <script>
   /* ── i18n ─────────────────────────────────────────────────── */
@@ -580,7 +582,7 @@
     var origLabel = wrapper.querySelector('.label');
     var clones = wrapper.querySelectorAll('.label-clone');
     if (clones.length === 0) return;
-    // Rebuild clones from updated original
+    var lotVal = document.getElementById('lotInput') ? document.getElementById('lotInput').value : '';
     clones.forEach(function(c) { c.parentNode.removeChild(c); });
     var qty = parseInt(document.getElementById('qtySelect').value) || 1;
     for (var i = 1; i < qty; i++) {
@@ -592,6 +594,9 @@
         el.style.pointerEvents = 'none';
         el.removeAttribute('onclick');
       });
+      // Restore lot value (disabled inputs lose their value in some browsers)
+      var lotClone = clone.querySelector('.lot-input');
+      if (lotClone) lotClone.value = lotVal;
       wrapper.appendChild(clone);
     }
   }
@@ -605,6 +610,16 @@
       if (warn) { warn.textContent = i18n[currentLang].printWarn; warn.style.display = 'block'; }
       return;
     }
+
+    // Validate LOT number
+    var lotInput = document.getElementById('lotInput');
+    var lotWarn = document.getElementById('lotWarning');
+    if (lotInput && !lotInput.value.trim()) {
+      if (lotWarn) lotWarn.style.display = 'inline-block';
+      lotInput.focus();
+      return;
+    }
+    if (lotWarn) lotWarn.style.display = 'none';
     if (warn) warn.style.display = 'none';
 
     // Switch label UI to Romanian for print
@@ -662,7 +677,12 @@
       wrapper.appendChild(clone);
     }
 
-    // Remove inline grid style so @media print CSS takes full control
+    // Copy lot value into clones (input values don't clone automatically)
+    var lotVal = document.getElementById('lotInput') ? document.getElementById('lotInput').value : '';
+    wrapper.querySelectorAll('.label-clone').forEach(function(c) {
+      var lotClone = c.querySelector('.lot-input');
+      if (lotClone) lotClone.value = lotVal;
+    });
     var savedGrid = wrapper.style.gridTemplateColumns;
     wrapper.style.gridTemplateColumns = '';
     wrapper.style.justifyContent = '';
