@@ -247,12 +247,12 @@
     <div class="section-title" data-i18n="batteryInfo">Informații alimentare / baterie</div>
 
     <div class="tbar" id="rcBar">
-      <button class="tbtn active" onclick="setRC(1)" data-i18n="withRC">Cu RC 2,4GHz</button>
-      <button class="tbtn" onclick="setRC(2)" data-i18n="withoutRC">Fără RC 2,4GHz</button>
+      <button class="tbtn" onclick="setRC(1)" data-i18n="withRC">Cu RC 2,4GHz</button>
+      <button class="tbtn active" onclick="setRC(2)" data-i18n="withoutRC">Fără RC 2,4GHz</button>
     </div>
 
     <div class="bat-checks" id="batChecks">
-      <label class="bat-check-label active"><input type="checkbox" value="A" checked onchange="updateBat()"><span class="check-box"></span>7.4V Li-Po</label>
+      <label class="bat-check-label"><input type="checkbox" value="A" onchange="updateBat()"><span class="check-box"></span>7.4V Li-Po</label>
       <label class="bat-check-label"><input type="checkbox" value="B" onchange="updateBat()"><span class="check-box"></span>3.7V Li-Po</label>
       <label class="bat-check-label"><input type="checkbox" value="C" onchange="updateBat()"><span class="check-box"></span>AA</label>
       <label class="bat-check-label"><input type="checkbox" value="D" onchange="updateBat()"><span class="check-box"></span>AAA</label>
@@ -737,6 +737,9 @@
   }
   // Apply default language on load
   setLang('en');
+  // Apply default state: no RC, no batteries
+  document.getElementById('rcBlock').style.display = 'none';
+  updateBat();
 </script>
 </body>
 </html>
